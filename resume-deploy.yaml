@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: resume
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: resume
+  template:
+    metadata:
+      labels:
+        app: resume
+    spec:
+      volumes:
+      - name: html-volume
+        hostPath:
+          path: /root/k3s-project/static-web  # 你的本地目录
+          type: Directory
+      containers:
+      - name: resume
+        image: nginx:alpine  # 直接用官方 Nginx 镜像，不用自己构建！
+        volumeMounts:
+        - name: html-volume
+          mountPath: /usr/share/nginx/html  # 挂载到 Nginx 的网页目录
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: resume-svc
+spec:
+  selector:
+    app: resume
+  ports:
+  - port: 80
+    targetPort: 80
+  type: NodePort
